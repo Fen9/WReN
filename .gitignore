@@ -1,2 +1,7 @@
-./results
+/results
+/venv
+/data
 
+.vscode/
+
+*.pyc
