@@ -63,6 +63,8 @@ elif args.model == 'LSTM':
 if args.cuda:
     model = model.cuda()
 
+log = logwrapper(args.log)
+
 def train(epoch):
     model.train()
     train_loss = 0
@@ -83,6 +85,8 @@ def train(epoch):
         acc_all += acc
     if counter > 0:
         print("Avg Training Loss: {:.6f}, Acc: {:.4f}".format(loss_all/float(counter), acc_all/float(counter)))
+        scalars = {'Train Acc':acc_all/float(counter), 'Train Loss':loss_all/float(counter)}
+        log.write_scalars('Train', scalars, epoch)
 
 def validate(epoch):
     model.eval()
@@ -106,6 +110,8 @@ def validate(epoch):
         loss_all += loss
     if counter > 0:
         print("Total Validation Loss: {:.6f}, Acc: {:.4f}".format(loss_all/float(counter), acc_all/float(counter)))
+        scalars = {'Val Acc':acc_all/float(counter), 'Val Loss':loss_all/float(counter)}
+        log.write_scalars('Validate', scalars, epoch)
 
 def test(epoch):
     model.eval()
@@ -124,11 +130,13 @@ def test(epoch):
         acc_all += acc
     if counter > 0:
         print("Total Testing Acc: {:.4f}".format(acc_all / float(counter)))
+        scalars = {'Test Acc':acc_all/float(counter)}
+        log.write_scalars('Test', scalars, epoch)
 
 def main():
     for epoch in range(0, args.epochs):
-        train(epoch)
-        validate(epoch)
+        # train(epoch)
+        # validate(epoch)
         test(epoch)
         model.save_model(args.save, epoch)
 

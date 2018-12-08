@@ -2,7 +2,6 @@ import os
 import numpy as np
 
 import seaborn as sns
-
 from tensorboardX import SummaryWriter
 
 class logwrapper(object):
@@ -25,7 +24,5 @@ class logwrapper(object):
 class plotwrapper(object):
     def __init__(self, plot_path):
         self.plot_path = plot_path
-    
-    
 
     
