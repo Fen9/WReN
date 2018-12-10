@@ -5,3 +5,6 @@ seaborn
 torch
 torchvision
 tqdm
+tensorflow
+tensorboard
+tensorboardX
