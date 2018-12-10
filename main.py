@@ -1,6 +1,7 @@
 import os
 import numpy as np
 import argparse
+from tqdm import tqdm
 
 import torch
 import torch.nn as nn
@@ -49,6 +50,10 @@ trainloader = DataLoader(train, batch_size=args.batch_size, shuffle=True, num_wo
 validloader = DataLoader(valid, batch_size=args.batch_size, shuffle=False, num_workers=16)
 testloader = DataLoader(test, batch_size=args.batch_size, shuffle=False, num_workers=16)
 
+train_iter = iter(trainloader)
+valid_iter = iter(validloader)
+test_iter = iter(testloader)
+
 model = None
 if args.model == 'WReN':
     model = models.WReN(args)
@@ -73,20 +78,20 @@ def train(epoch):
     loss_all = 0.0
     acc_all = 0.0
     counter = 0
-    for batch_idx, (image, target, meta_target) in enumerate(trainloader):
+    for _ in tqdm(range(len(train_iter))):
         counter += 1
+        image, target, meta_target = next(train_iter)
         if args.cuda:
             image = image.cuda()
             target = target.cuda()
             meta_target = meta_target.cuda()
         loss, acc = model.train_(image, target, meta_target)
-        print('Train: Epoch:{}, Batch:{}, Loss:{:.6f}, Acc:{:.4f}.'.format(epoch, batch_idx, loss, acc))
+        # print('Train: Epoch:{}, Batch:{}, Loss:{:.6f}, Acc:{:.4f}.'.format(epoch, batch_idx, loss, acc))
         loss_all += loss
         acc_all += acc
     if counter > 0:
         print("Avg Training Loss: {:.6f}, Acc: {:.4f}".format(loss_all/float(counter), acc_all/float(counter)))
-        scalars = {'Train Acc':acc_all/float(counter), 'Train Loss':loss_all/float(counter)}
-        log.write_scalars('Train', scalars, epoch)
+    return loss_all/float(counter), acc_all/float(counter)
 
 def validate(epoch):
     model.eval()
@@ -97,8 +102,10 @@ def validate(epoch):
     acc_all = 0.0
     loss_all = 0.0
     counter = 0
-    for batch_idx, (image, target, meta_target) in enumerate(validloader):
+    for _ in tqdm(range(len(valid_iter))):
         counter += 1
+        image, target, meta_target = next(valid_iter)
+
         if args.cuda:
             image = image.cuda()
             target = target.cuda()
@@ -110,8 +117,7 @@ def validate(epoch):
         loss_all += loss
     if counter > 0:
         print("Total Validation Loss: {:.6f}, Acc: {:.4f}".format(loss_all/float(counter), acc_all/float(counter)))
-        scalars = {'Val Acc':acc_all/float(counter), 'Val Loss':loss_all/float(counter)}
-        log.write_scalars('Validate', scalars, epoch)
+    return loss_all/float(counter), acc_all/float(counter)
 
 def test(epoch):
     model.eval()
@@ -119,8 +125,9 @@ def test(epoch):
 
     acc_all = 0.0
     counter = 0
-    for batch_idx, (image, target, meta_target) in enumerate(testloader):
+    for _ in tqdm(range(len(test_iter))):
         counter += 1
+        image, target, meta_target = next(test_iter)
         if args.cuda:
             image = image.cuda()
             target = target.cuda()
@@ -130,16 +137,19 @@ def test(epoch):
         acc_all += acc
     if counter > 0:
         print("Total Testing Acc: {:.4f}".format(acc_all / float(counter)))
-        scalars = {'Test Acc':acc_all/float(counter)}
-        log.write_scalars('Test', scalars, epoch)
+    return acc_all/float(counter)
 
 def main():
     for epoch in range(0, args.epochs):
-        train(epoch)
-        validate(epoch)
-        test(epoch)
-        model.save_model(args.save, epoch)
+        train_loss, train_acc = train(epoch)
+        val_loss, val_acc = validate(epoch)
+        test_acc = test(epoch)
 
+        model.save_model(args.save, epoch)
+        loss = {'train':train_loss, 'val':val_loss}
+        acc = {'train':train_acc, 'val':val_acc, 'test':test_acc}
+        log.write_scalars('Loss', loss, epoch)
+        log.write_scalars('Accuracy', acc, epoch)
 
 if __name__ == '__main__':
     main()
