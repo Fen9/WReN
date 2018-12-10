@@ -3,7 +3,7 @@
 This repo is an implementation of "Measuring abstract reasoning in neural networks", which is published in ICML 2018 by DeepMind.
 
 # Dependencies
-* Fulfill the requirements: requirements.txt
+* Fulfill the requirements: see `requirements.txt`
 
 # Usage
 * Run the code `python main.py`
