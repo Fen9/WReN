@@ -7,5 +7,5 @@ This repo is an implementation of "Measuring abstract reasoning in neural networ
 
 # Usage
 * Run the code `python main.py`
-* Params: --model      Models that are shown in the paper, including baselines.
-           --img_size   Size of input images.
+* Params: - `--model` Models that are shown in the paper, including baselines.
+          - `--img_size` Size of input images.
