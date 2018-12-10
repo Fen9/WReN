@@ -32,7 +32,7 @@ class mlp_module(nn.Module):
 class Resnet50_MLP(BasicModel):
     def __init__(self, args):
         super(Resnet50_MLP, self).__init__(args)
-        self.resnet50 = models.resnet18(pretrained=False)
+        self.resnet50 = models.resnet50(pretrained=False)
         self.resnet50.conv1 = nn.Conv2d(16, 64, kernel_size=7, stride=2, padding=3, bias=False)
         self.resnet50.fc = identity()
         self.mlp = mlp_module()
@@ -44,7 +44,7 @@ class Resnet50_MLP(BasicModel):
         return loss
 
     def forward(self, x):
-        features = self.resnet18(x.view(-1, 16, 224, 224))
+        features = self.resnet50(x.view(-1, 16, 224, 224))
         score = self.mlp(features)
         return score, None
 
