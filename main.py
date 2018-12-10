@@ -50,10 +50,6 @@ trainloader = DataLoader(train, batch_size=args.batch_size, shuffle=True, num_wo
 validloader = DataLoader(valid, batch_size=args.batch_size, shuffle=False, num_workers=16)
 testloader = DataLoader(test, batch_size=args.batch_size, shuffle=False, num_workers=16)
 
-train_iter = iter(trainloader)
-valid_iter = iter(validloader)
-test_iter = iter(testloader)
-
 model = None
 if args.model == 'WReN':
     model = models.WReN(args)
@@ -78,6 +74,7 @@ def train(epoch):
     loss_all = 0.0
     acc_all = 0.0
     counter = 0
+    train_iter = iter(trainloader)
     for _ in tqdm(range(len(train_iter))):
         counter += 1
         image, target, meta_target = next(train_iter)
@@ -102,6 +99,7 @@ def validate(epoch):
     acc_all = 0.0
     loss_all = 0.0
     counter = 0
+    valid_iter = iter(validloader)
     for _ in tqdm(range(len(valid_iter))):
         counter += 1
         image, target, meta_target = next(valid_iter)
@@ -125,6 +123,7 @@ def test(epoch):
 
     acc_all = 0.0
     counter = 0
+    test_iter = iter(testloader)
     for _ in tqdm(range(len(test_iter))):
         counter += 1
         image, target, meta_target = next(test_iter)
@@ -141,15 +140,15 @@ def test(epoch):
 
 def main():
     for epoch in range(0, args.epochs):
-        train_loss, train_acc = train(epoch)
+        # train_loss, train_acc = train(epoch)
         val_loss, val_acc = validate(epoch)
-        test_acc = test(epoch)
+        # test_acc = test(epoch)
 
         model.save_model(args.save, epoch)
-        loss = {'train':train_loss, 'val':val_loss}
-        acc = {'train':train_acc, 'val':val_acc, 'test':test_acc}
-        log.write_scalars('Loss', loss, epoch)
-        log.write_scalars('Accuracy', acc, epoch)
+        # loss = {'train':train_loss, 'val':val_loss}
+        # acc = {'train':train_acc, 'val':val_acc, 'test':test_acc}
+        # log.write_scalars('Loss', loss, epoch)
+        # log.write_scalars('Accuracy', acc, epoch)
 
 if __name__ == '__main__':
     main()
