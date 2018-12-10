@@ -135,8 +135,8 @@ def test(epoch):
 
 def main():
     for epoch in range(0, args.epochs):
-        # train(epoch)
-        # validate(epoch)
+        train(epoch)
+        validate(epoch)
         test(epoch)
         model.save_model(args.save, epoch)
 
