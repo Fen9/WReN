@@ -140,15 +140,15 @@ def test(epoch):
 
 def main():
     for epoch in range(0, args.epochs):
-        # train_loss, train_acc = train(epoch)
+        train_loss, train_acc = train(epoch)
         val_loss, val_acc = validate(epoch)
-        # test_acc = test(epoch)
+        test_acc = test(epoch)
 
         model.save_model(args.save, epoch)
-        # loss = {'train':train_loss, 'val':val_loss}
-        # acc = {'train':train_acc, 'val':val_acc, 'test':test_acc}
-        # log.write_scalars('Loss', loss, epoch)
-        # log.write_scalars('Accuracy', acc, epoch)
+        loss = {'train':train_loss, 'val':val_loss}
+        acc = {'train':train_acc, 'val':val_acc, 'test':test_acc}
+        log.write_scalars('Loss', loss, epoch)
+        log.write_scalars('Accuracy', acc, epoch)
 
 if __name__ == '__main__':
     main()
