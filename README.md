@@ -1,16 +1,24 @@
 # Wild-Relation-Network
 
-This repo is an implementation of "Measuring abstract reasoning in neural networks", which is published in ICML 2018 by DeepMind.
+The repo is a PyTorch implementation of Wild Relational Network introduced in [Measuring abstract reasoning in neural networks (ICML 2018)](http://proceedings.mlr.press/v80/santoro18a/santoro18a.pdf).
 
 # Dependencies
-* Fulfill the requirements: see `requirements.txt`
+
+**Important**
+* PyTorch (0.4.1)
+* TensorBoardX (and Tensorboard)
+
+See ```requirements.txt``` for other dependencies.
 
 # Usage
-* Run the code `python main.py`
-- `--model` Models that are shown in the paper, including baselines.
-- `--img_size` Size of input images.
-- `--path` Path of the dataset
+
+Run
+```Python
+python main.py --model <WReN/CNN_MLP/Resnet50_MLP/LSTM> --img_size <input image size> --path <path to your dataset>
+```
 
 # Accuracy Plot
-* We follow the hyper-parameters described in the paper. Unfortunately, we cannot reproduce the performance.
-<img src=./wren.png>
+
+The following figure shows the WReN performance we got using the hyper-parameters in the paper.
+
+![AccPlot](./figures/wren.png)
