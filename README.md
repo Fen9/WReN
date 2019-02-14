@@ -13,7 +13,7 @@ See ```requirements.txt``` for other dependencies.
 # Usage
 
 Run
-```python
+```Bash
 python main.py --model <WReN/CNN_MLP/Resnet50_MLP/LSTM> --img_size <input image size> --path <path to your dataset>
 ```
 
