@@ -22,7 +22,7 @@ class conv_module(nn.Module):
         self.conv4 = nn.Conv2d(32, 32, kernel_size=3, stride=2)
         self.batch_norm4 = nn.BatchNorm2d(32)
         self.relu4 = nn.ReLU()
-        self.fc = nn.Linear(32*4*4, 256)
+        # self.fc = nn.Linear(32*4*4, 256)
 
     def forward(self, x):
         x = self.conv1(x)
@@ -33,7 +33,7 @@ class conv_module(nn.Module):
         x = self.relu3(self.batch_norm3(x))
         x = self.conv4(x)
         x = self.relu4(self.batch_norm4(x))
-        return self.fc(x.view(-1, 32*4*4))
+        return x.view(-1, 16, 32*4*4)
 
 class relation_module(nn.Module):
     def __init__(self):
@@ -72,14 +72,41 @@ class mlp_module(nn.Module):
         x = self.fc3(x)
         return x.view(-1, 8, 13)
 
+class panels_to_embeddings(nn.Module):
+    def __init__(self, tag):
+        super(panels_to_embeddings, self).__init__()
+        self.in_dim = 512
+        if tag:
+            self.in_dim += 16
+        self.fc = nn.Linear(self.in_dim, 256)
+
+    def forward(self, x):
+        return self.fc(x.view(-1, self.in_dim))
+
 class WReN(BasicModel):
     def __init__(self, args):
         super(WReN, self).__init__(args)
         self.conv = conv_module()
         self.rn = relation_module()
         self.mlp = mlp_module()
+        self.proj = panels_to_embeddings(args.tag)
         self.optimizer = optim.Adam(self.parameters(), lr=args.lr, betas=(args.beta1, args.beta2), eps=args.epsilon)
         self.meta_beta = args.meta_beta
+        self.tag = args.tag
+        self.use_cuda = args.cuda
+
+    def tag_panels(self, panel_features):
+        tags = []
+        for idx in range(0, panel_features.size()[1]):
+            tag = np.zeros([1, panel_features.size()[1]], dtype=float)
+            tag[:,idx] = 1
+            tag = torch.tensor(tag, dtype=torch.float).expand(panel_features.size()[0], -1).unsqueeze(1)
+            if self.use_cuda:
+                tag = tag.cuda()
+            tags.append(tag)
+        tags = torch.cat(tags, dim=1)
+        panel_features = torch.cat((panel_features, tags), dim=2)
+        return panel_features
 
     def group_panel_embeddings(self, embeddings):
         embeddings = embeddings.view(-1, 16, 256)
@@ -121,8 +148,11 @@ class WReN(BasicModel):
 
     def forward(self, x):
         # print(x.size())
-        panel_embeddings = self.conv(x.view(-1, 1, 80, 80))
+        panel_features = self.conv(x.view(-1, 1, 80, 80))
         # print(panel_embeddings.size())
+        if self.tag:
+            panel_features = self.tag_panels(panel_features)
+        panel_embeddings = self.proj(panel_features)
         panel_embeddings_pairs = self.group_panel_embeddings(panel_embeddings)
         # print(panel_embeddings_pairs.size())
         panel_embedding_features = self.rn(panel_embeddings_pairs.view(-1, 512))
