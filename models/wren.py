@@ -91,22 +91,22 @@ class WReN(BasicModel):
         self.mlp = mlp_module()
         self.proj = panels_to_embeddings(args.tag)
         self.optimizer = optim.Adam(self.parameters(), lr=args.lr, betas=(args.beta1, args.beta2), eps=args.epsilon)
-        self.meta_beta = args.meta_beta
-        self.tag = args.tag
+        self.meta_beta = args.meta_beta 
+        self.use_tag = args.tag
         self.use_cuda = args.cuda
+        self.tags = self.tag_panels(args.batch_size)
 
-    def tag_panels(self, panel_features):
+    def tag_panels(self, batch_size):
         tags = []
-        for idx in range(0, panel_features.size()[1]):
-            tag = np.zeros([1, panel_features.size()[1]], dtype=float)
+        for idx in range(0, 16):
+            tag = np.zeros([1, 16], dtype=float)
             tag[:,idx] = 1
-            tag = torch.tensor(tag, dtype=torch.float).expand(panel_features.size()[0], -1).unsqueeze(1)
+            tag = torch.tensor(tag, dtype=torch.float).expand(batch_size, -1).unsqueeze(1)
             if self.use_cuda:
                 tag = tag.cuda()
             tags.append(tag)
         tags = torch.cat(tags, dim=1)
-        panel_features = torch.cat((panel_features, tags), dim=2)
-        return panel_features
+        return tags
 
     def group_panel_embeddings(self, embeddings):
         embeddings = embeddings.view(-1, 16, 256)
@@ -147,11 +147,10 @@ class WReN(BasicModel):
         return loss
 
     def forward(self, x):
-        # print(x.size())
         panel_features = self.conv(x.view(-1, 1, 80, 80))
         # print(panel_embeddings.size())
-        if self.tag:
-            panel_features = self.tag_panels(panel_features)
+        if self.use_tag:
+            panel_features = torch.cat((panel_features, self.tags), dim=2)
         panel_embeddings = self.proj(panel_features)
         panel_embeddings_pairs = self.group_panel_embeddings(panel_embeddings)
         # print(panel_embeddings_pairs.size())
