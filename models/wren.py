@@ -130,6 +130,20 @@ class WReN(BasicModel):
         panel_embeddings_pairs = torch.cat(panel_embeddings_pairs, dim=1)
         return panel_embeddings_pairs.view(-1, 8, 72, 512)
 
+    def group_panel_embeddings_batch(self, embeddings):
+        embeddings = embeddings.view(-1, 16, 256)
+        context_embeddings = embeddings[:,:8,:]
+        choice_embeddings = embeddings[:,8:,:]
+        context_embeddings_pairs = torch.cat((context_embeddings.unsqueeze(1).expand(-1, 8, -1, -1), context_embeddings.unsqueeze(2).expand(-1, -1, 8, -1)), dim=3).view(-1, 64, 512)
+        
+        context_embeddings = context_embeddings.unsqueeze(1).expand(-1, 8, -1, -1)
+        choice_embeddings = choice_embeddings.unsqueeze(2).expand(-1, -1, 8, -1)
+        choice_context_order = torch.cat((context_embeddings, choice_embeddings), dim=3)
+        choice_context_reverse = torch.cat((choice_embeddings, context_embeddings), dim=3)
+        embedding_paris = [context_embeddings_pairs.unsqueeze(1).expand(-1, 8, -1, -1), choice_context_order, choice_context_reverse]
+        return torch.cat(embedding_paris, dim=2).view(-1, 8, 80, 512)
+
+
     def rn_sum_features(self, features):
         features = features.view(-1, 8, 72, 256)
         sum_features = torch.sum(features, dim=2)
@@ -152,7 +166,9 @@ class WReN(BasicModel):
         if self.use_tag:
             panel_features = torch.cat((panel_features, self.tags), dim=2)
         panel_embeddings = self.proj(panel_features)
-        panel_embeddings_pairs = self.group_panel_embeddings(panel_embeddings)
+        # panel_embeddings_pairs = self.group_panel_embeddings(panel_embeddings)
+        # self.group_panel_embeddings(panel_embeddings)
+        panel_embeddings_pairs = self.group_panel_embeddings_batch(panel_embeddings)
         # print(panel_embeddings_pairs.size())
         panel_embedding_features = self.rn(panel_embeddings_pairs.view(-1, 512))
         # print(panel_embedding_features.size())
