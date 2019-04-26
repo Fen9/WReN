@@ -145,7 +145,7 @@ class WReN(BasicModel):
 
 
     def rn_sum_features(self, features):
-        features = features.view(-1, 8, 72, 256)
+        features = features.view(-1, 8, 80, 256)
         sum_features = torch.sum(features, dim=2)
         return sum_features
 
