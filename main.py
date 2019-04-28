@@ -29,7 +29,7 @@ parser.add_argument('--beta1', type=float, default=0.9)
 parser.add_argument('--beta2', type=float, default=0.999)
 parser.add_argument('--epsilon', type=float, default=1e-8)
 parser.add_argument('--meta_beta', type=float, default=10.0)
-parser.add_argument('--tag', type=bool, default=True)
+parser.add_argument('--tag', type=int, default=1)
 
 
 args = parser.parse_args()
