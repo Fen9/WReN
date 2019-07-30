@@ -77,7 +77,7 @@ class panels_to_embeddings(nn.Module):
         super(panels_to_embeddings, self).__init__()
         self.in_dim = 512
         if tag:
-            self.in_dim += 16
+            self.in_dim += 9
         self.fc = nn.Linear(self.in_dim, 256)
 
     def forward(self, x):
@@ -100,7 +100,10 @@ class WReN(BasicModel):
         tags = []
         for idx in range(0, 16):
             tag = np.zeros([1, 16], dtype=float)
-            tag[:,idx] = 1
+            if idx < 8
+                tag[:, idx] = 1.0
+            else:
+                tag[:, 8] = 1.0
             tag = torch.tensor(tag, dtype=torch.float).expand(batch_size, -1).unsqueeze(1)
             if self.use_cuda:
                 tag = tag.cuda()
