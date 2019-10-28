@@ -100,7 +100,7 @@ class WReN(BasicModel):
         tags = []
         for idx in range(0, 16):
             tag = np.zeros([1, 16], dtype=float)
-            if idx < 8
+            if idx < 8:
                 tag[:, idx] = 1.0
             else:
                 tag[:, 8] = 1.0
