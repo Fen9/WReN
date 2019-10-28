@@ -99,7 +99,7 @@ class WReN(BasicModel):
     def tag_panels(self, batch_size):
         tags = []
         for idx in range(0, 16):
-            tag = np.zeros([1, 16], dtype=float)
+            tag = np.zeros([1, 9], dtype=float)
             if idx < 8:
                 tag[:, idx] = 1.0
             else:
