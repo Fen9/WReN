@@ -101,9 +101,9 @@ class WReN(BasicModel):
         for idx in range(0, 16):
             tag = np.zeros([1, 9], dtype=float)
             if idx < 8:
-                tag[idx, idx] = 1.0
+                tag[:, idx] = 1.0
             else:
-                tag[idx, 8] = 1.0
+                tag[:, 8] = 1.0
             tag = torch.tensor(tag, dtype=torch.float).expand(batch_size, -1).unsqueeze(1)
             if self.use_cuda:
                 tag = tag.cuda()
