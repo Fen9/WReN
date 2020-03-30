@@ -56,8 +56,7 @@ class CNN_LSTM(BasicModel):
         super(CNN_LSTM, self).__init__(args)
         self.conv = conv_module()
         self.lstm = lstm_module()
-        self.tags = torch.tensor(self.build_tags(), dtype=torch.float)
-        self.register_buffer("tags", self.tags)
+        self.register_buffer("tags", torch.tensor(self.build_tags(), dtype=torch.float))
         self.optimizer = optim.Adam(self.parameters(), lr=args.lr, betas=(args.beta1, args.beta2), eps=args.epsilon)
 
     def build_tags(self):
